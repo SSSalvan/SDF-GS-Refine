@@ -1,0 +1,20 @@
+{
+  "chamfer": {
+    "chamfer_distance": 32.045047347614386,
+    "pred_to_gt_mean": 19.316040564695076,
+    "gt_to_pred_mean": 44.7740541305337
+  },
+  "f_scores": {
+    "f_score@1.0": {
+      "precision": 0.0102,
+      "recall": 0.01084,
+      "f1": 0.010510266159695818
+    },
+    "f_score@5.0": {
+      "precision": 0.13054,
+      "recall": 0.11804,
+      "f1": 0.12397571486040712
+    }
+  },
+  "alignment_scale": 316.66484638911055
+}

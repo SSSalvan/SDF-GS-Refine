@@ -1,0 +1,28 @@
+# Credentials (NEVER commit)
+credentials.json
+kaggle.json
+token.json
+*.secret
+*.key
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Editor
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store

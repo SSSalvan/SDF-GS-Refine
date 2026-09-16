@@ -1,0 +1,53 @@
+{
+  "run_hash": "5a1fac13",
+  "scan": "scan105",
+  "ply_path": "/root/.cache/kagglehub/datasets/silvanusalvan/3dgs-trainingsdfgs/versions/1/3DGS/scan105_proper/scan105/point_cloud/iteration_30000/point_cloud.ply",
+  "cam_source": "official cameras.json (64 cams)",
+  "synthetic_demo": false,
+  "config": {
+    "seed": 42,
+    "opacity_thresh": 0.05,
+    "cull_sigma": 4.0,
+    "max_candidates": 4096,
+    "surface_stride": 16,
+    "n_surface_samples": 66611,
+    "n_iters": 8000,
+    "s_batch": 4096,
+    "domain_batch": 1024,
+    "lambda_e": 0.1,
+    "lambda_surf_e": 0.05,
+    "lambda_n": 0.05,
+    "lambda_nc": 1.0,
+    "disambiguate": true,
+    "cos_keep": -0.2,
+    "disamb_k": 24,
+    "lr_sdf": 0.0005,
+    "remove_documented_bridge": false
+  },
+  "gaussian_counts": {
+    "full": 225500,
+    "filtered": 204616
+  },
+  "topology": {
+    "160": {
+      "name": "grid 160",
+      "vertices": 63805,
+      "faces": 126678,
+      "watertight": false,
+      "euler": -1,
+      "genus": null,
+      "boundary_edges": 934
+    },
+    "256": {
+      "name": "grid 256",
+      "vertices": 163670,
+      "faces": 325850,
+      "watertight": false,
+      "euler": -1,
+      "genus": null,
+      "boundary_edges": 1492
+    }
+  },
+  "gt": null,
+  "final_loss": 0.33106330037117004
+}

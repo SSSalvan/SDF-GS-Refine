@@ -1,0 +1,78 @@
+{
+  "_comment": "Values marked FROM_PAPER are taken verbatim from Bab III text/Table 3.1-3.3. Values marked ASSUMED were left blank in the paper's Table 3.3 and required a reasoned default for this implementation -- see Section 5 / Technical Review discussion in the notebook.",
+
+  "seed": 42,
+
+  "root_dir_3dgs": "3DGS_Pretrained_SDFGS",
+  "dataset_dir": "DTU",
+  "gt_mesh_dir": "DTU_GT",
+
+  "kaggle": {
+    "enabled": true,
+    "dataset_3dgs_training": "silvanusalvan/3dgs-trainingsdfgs",
+    "dataset_dtu_groundtruth": "silvanusalvan/dtu-groundtruth",
+    "_note": "Auto-downloaded via kagglehub.dataset_download() at notebook startup if credentials are available (env vars KAGGLE_USERNAME/KAGGLE_KEY, ~/.kaggle/kaggle.json, or kagglehub.login()). Falls back to the local root_dir_3dgs/dataset_dir/gt_mesh_dir folders, then to the synthetic scene, if Kaggle is unreachable or unauthenticated -- see Section 3."
+  },
+
+  "gaussian_opacity_filter_threshold": 0.05,
+
+  "sdf_network": {
+    "d_hidden": 256,
+    "n_layers": 8,
+    "activation": "softplus",
+    "softplus_beta": 100.0,
+    "radius_init": 1.0,
+    "_source": "FROM_PAPER (Bab III: 8 hidden layers x256, Softplus beta=100, geometric init)"
+  },
+
+  "joint_refinement": {
+    "lambda_eikonal": 0.1,
+    "lambda_normal": 0.05,
+    "lr_gaussian": 1e-4,
+    "lr_sdf": 5e-4,
+    "n_iterations_paper": 10000,
+    "n_iterations_smoke_test": 300,
+    "batch_size_rays_paper": 1024,
+    "batch_size_rays_smoke_test": 64,
+    "_source_weights_and_lr": "FROM_PAPER (Bab III: lambda_e=0.1, lambda_n=0.05, eta_gaussian=1e-4, eta_SDF=5e-4, 10000 iters, batch 1024 rays)",
+    "_note_smoke_test": "ASSUMED: smoke-test iteration count/batch size reduced from the paper's 10000/1024 to keep runtime bounded on this sandbox's single CPU core with no GPU. Not a methodological change -- same loss, same update rule, fewer steps."
+  },
+
+  "transmittance": {
+    "min_opacity_filter": 0.05,
+    "cull_sigma": 4.0,
+    "max_candidates_per_ray": 4096,
+    "_source": "FROM_PAPER for min_opacity_filter (Subbab 3.5 mitigation 1). cull_sigma/max_candidates are ASSUMED engineering-only culling parameters (see transmittance.py docstring) -- they do not change Eq 3.2/3.3, only tractability."
+  },
+
+  "mesh_extraction": {
+    "grid_resolution_paper": 512,
+    "grid_resolution_smoke_test": 96,
+    "bounding_box_margin": 0.10,
+    "_source": "FROM_PAPER for 512^3 grid and 10% bbox margin. Smoke-test resolution reduced (ASSUMED) for CPU tractability -- same Marching Cubes algorithm, isovalue=0."
+  },
+
+  "mesh_postprocess": {
+    "min_component_area_fraction": 0.01,
+    "max_hole_boundary_edges": 100,
+    "laplacian_smoothing_iters": 3,
+    "laplacian_smoothing_lambda": 0.5,
+    "_source": "FROM_PAPER (Subbab 3.7)"
+  },
+
+  "evaluation": {
+    "n_sample_points": 100000,
+    "f_score_thresholds_m": [0.001, 0.005],
+    "_source": "FROM_PAPER (Subbab 3.8: Chamfer bidirectional + F-score at 1mm/5mm, Poisson-disk-like sampling). LPIPS omitted -- see evaluation.py docstring (no offline pretrained VGG weights available in this sandbox)."
+  },
+
+  "synthetic_fallback": {
+    "enabled_reason": "No point_cloud.ply / DTU images / camera calibration were uploaded with the paper -- only the thesis document itself. This block configures the clearly-labeled synthetic smoke-test scene (src/synthetic.py), used ONLY when auto-discovery under root_dir_3dgs/dataset_dir finds nothing real.",
+    "sphere_radius": 1.0,
+    "n_gaussians": 4000,
+    "n_synthetic_views": 6,
+    "image_h": 24,
+    "image_w": 24,
+    "focal": 28.0
+  }
+}

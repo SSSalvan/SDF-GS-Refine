@@ -1,0 +1,11 @@
+{
+  "camera_index": 0,
+  "render_stride": 8,
+  "render_batch_size": 10000,
+  "height": 146,
+  "width": 195,
+  "reference": "frozen_pre_refinement_render",
+  "psnr_db": 23.55305570392837,
+  "ssim": 0.7597570419311523,
+  "lpips": "SKIPPED (no offline pretrained weights)"
+}
