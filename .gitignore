@@ -1,28 +1,42 @@
-# Credentials (NEVER commit)
-credentials.json
-kaggle.json
-token.json
-*.secret
-*.key
-
-# Python
+# Byte-compiled / optimized / DLL files
 __pycache__/
-*.pyc
-*.pyo
-*.egg-info/
-dist/
-build/
+*.py[cod]
+*$py.class
 
-# Jupyter
+# Jupyter Notebook checkpoints
 .ipynb_checkpoints/
+*-checkpoint.ipynb
 
-# Editor
-*.swp
-*.swo
-*~
+# Heavy model weights and checkpoints (keep repo under GitHub limits)
+*.pt
+*.pth
+*.ckpt
+*.bin
+checkpoints/
+run_artifacts/
+outputs/
+SDF-GS-Refine-implementation/run_artifacts/
+
+# Large mesh and point cloud binaries (>50MB)
+*.npz
+*.tar.gz
+*.zip
+*.7z
+*.ply
+*.obj
+*.stl
+data/
+dtu_dataset/
+
+# Environments and OS specific
+.env
+.venv
+env/
+venv/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs
 .vscode/
 .idea/
-
-# OS
-Thumbs.db
-.DS_Store

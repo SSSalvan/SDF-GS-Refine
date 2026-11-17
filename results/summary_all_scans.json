@@ -1,0 +1,408 @@
+{
+  "scan105": {
+    "elapsed_sec": 785.7297039031982,
+    "results": {
+      "SDF-GS Refine (Ours)": {
+        "accuracy_mean_mm": 2.0129633518784082,
+        "completeness_mean_mm": 1.6047497110330247,
+        "chamfer_mean_mm": 1.8088565314557163,
+        "accuracy_median_mm": 0.9120726972322061,
+        "completeness_median_mm": 0.9793450201448702,
+        "chamfer_median_mm": 0.9457088586885382,
+        "num_eval_points": 495121,
+        "precision_1mm": 0.5220850590968785,
+        "recall_1mm": 0.5076104215062847,
+        "fscore_1mm": 0.5147460038477824,
+        "precision_2mm": 0.6884655015658148,
+        "recall_2mm": 0.7428930943050895,
+        "fscore_2mm": 0.714644489865714,
+        "precision_5mm": 0.8790039397918982,
+        "recall_5mm": 0.944862574403016,
+        "fscore_5mm": 0.9107442008482515,
+        "vertices": 395961,
+        "faces": 786470,
+        "components": 1,
+        "is_watertight": false,
+        "euler_number": -2
+      },
+      "Ours (Post-Processed Viz Mesh)": {
+        "accuracy_mean_mm": 1.894294966108519,
+        "completeness_mean_mm": 1.4806353765757456,
+        "chamfer_mean_mm": 1.6874651713421325,
+        "accuracy_median_mm": 0.7401697707348688,
+        "completeness_median_mm": 0.862353348007517,
+        "chamfer_median_mm": 0.8012615593711929,
+        "num_eval_points": 526188,
+        "precision_1mm": 0.5741955597292268,
+        "recall_1mm": 0.5527731933765614,
+        "fscore_1mm": 0.5632807694081161,
+        "precision_2mm": 0.7184007573438976,
+        "recall_2mm": 0.7753326189489163,
+        "fscore_2mm": 0.7457817432301136,
+        "precision_5mm": 0.8820452087162983,
+        "recall_5mm": 0.949307386056989,
+        "fscore_5mm": 0.9144410900012601,
+        "vertices": 395961,
+        "faces": 786470,
+        "components": 1,
+        "is_watertight": false,
+        "euler_number": -2
+      },
+      "Ours (Stage 1 Metric Mesh)": {
+        "accuracy_mean_mm": 1.938847111178656,
+        "completeness_mean_mm": 1.5828609916230736,
+        "chamfer_mean_mm": 1.7608540514008648,
+        "accuracy_median_mm": 0.8635823404543213,
+        "completeness_median_mm": 0.9748055051640132,
+        "chamfer_median_mm": 0.9191939228091672,
+        "num_eval_points": 492096,
+        "precision_1mm": 0.5360879437179719,
+        "recall_1mm": 0.5093940063813512,
+        "fscore_1mm": 0.5224001914089379,
+        "precision_2mm": 0.7048262936755897,
+        "recall_2mm": 0.7465701704106406,
+        "fscore_2mm": 0.725097930441179,
+        "precision_5mm": 0.8857935038245679,
+        "recall_5mm": 0.948053218356851,
+        "fscore_5mm": 0.9158664919405357,
+        "vertices": 395800,
+        "faces": 786459,
+        "components": 1,
+        "is_watertight": false,
+        "euler_number": -1
+      },
+      "Ours (MVC Surface Cloud)": {
+        "accuracy_mean_mm": 0.712727964890743,
+        "completeness_mean_mm": 0.9576879544655345,
+        "chamfer_mean_mm": 0.8352079596781388,
+        "accuracy_median_mm": 0.43476386970543796,
+        "completeness_median_mm": 0.6096620189374943,
+        "chamfer_median_mm": 0.5222129443214661,
+        "num_eval_points": 539283,
+        "precision_1mm": 0.8147521802096488,
+        "recall_1mm": 0.7080906775204437,
+        "fscore_1mm": 0.7576860873955801,
+        "precision_2mm": 0.941633613520174,
+        "recall_2mm": 0.8969565633876608,
+        "fscore_2mm": 0.9187522706923485,
+        "precision_5mm": 0.9907006154468062,
+        "recall_5mm": 0.9855931358462017,
+        "fscore_5mm": 0.9881402758311036
+      },
+      "Original 3DGS Centers": {
+        "accuracy_mean_mm": 1.351517594914993,
+        "completeness_mean_mm": 1.0532791996091893,
+        "chamfer_mean_mm": 1.202398397262091,
+        "accuracy_median_mm": 0.6286473353048017,
+        "completeness_median_mm": 0.7651122960938695,
+        "chamfer_median_mm": 0.6968798156993357,
+        "num_eval_points": 129255,
+        "precision_1mm": 0.6035201733008394,
+        "recall_1mm": 0.671190227857793,
+        "fscore_1mm": 0.6355590136651831,
+        "precision_2mm": 0.7554059804262891,
+        "recall_2mm": 0.9085101936381073,
+        "fscore_2mm": 0.8249141924933431,
+        "precision_5mm": 0.9588255773471046,
+        "recall_5mm": 0.9845308270148012,
+        "fscore_5mm": 0.9715081973740642
+      }
+    },
+    "historical_reference": {
+      "Thesis_Original_SDF_GS (Stage 2)": {
+        "chamfer_mean_mm": 2.8,
+        "accuracy_mean_mm": 2.95,
+        "completeness_mean_mm": 2.65
+      },
+      "Thesis_Original_SDF_GS (Stage 1)": {
+        "chamfer_mean_mm": 2.27,
+        "accuracy_mean_mm": 2.41,
+        "completeness_mean_mm": 2.13
+      },
+      "Thesis_Reported_PGSR": {
+        "chamfer_mean_mm": 0.69
+      },
+      "Thesis_Reported_2DGS": {
+        "chamfer_mean_mm": 0.76
+      },
+      "Thesis_Reported_GOF": {
+        "chamfer_mean_mm": 0.85
+      },
+      "Thesis_Reported_SuGaR": {
+        "chamfer_mean_mm": 1.18
+      }
+    },
+    "figures": {
+      "multiview_comparison": "/notebooks/SDF_GS_SDF-GS Refine/outputs/scan105/reconstructions/scan105_multiview_3d_comparison.png",
+      "closeup_comparison": "/notebooks/SDF_GS_SDF-GS Refine/outputs/scan105/reconstructions/scan105_closeup_detail_comparison.png"
+    }
+  },
+  "scan24": {
+    "elapsed_sec": 784.1136107444763,
+    "results": {
+      "SDF-GS Refine (Ours)": {
+        "accuracy_mean_mm": 1.7338130385073678,
+        "completeness_mean_mm": 1.817693634630171,
+        "chamfer_mean_mm": 1.7757533365687694,
+        "accuracy_median_mm": 0.8420053062764192,
+        "completeness_median_mm": 1.1515435411957833,
+        "chamfer_median_mm": 0.9967744237361013,
+        "num_eval_points": 397453,
+        "precision_1mm": 0.5606558202156707,
+        "recall_1mm": 0.4450393882622328,
+        "fscore_1mm": 0.4962018733927867,
+        "precision_2mm": 0.7699696752356147,
+        "recall_2mm": 0.7105320505314651,
+        "fscore_2mm": 0.7390577432913825,
+        "precision_5mm": 0.9219860833238962,
+        "recall_5mm": 0.9381065987536266,
+        "fscore_5mm": 0.929976486719075,
+        "vertices": 319839,
+        "faces": 635592,
+        "components": 1,
+        "is_watertight": false,
+        "euler_number": -2
+      },
+      "Ours (Post-Processed Viz Mesh)": {
+        "accuracy_mean_mm": 1.5768802961324044,
+        "completeness_mean_mm": 1.5441543214120725,
+        "chamfer_mean_mm": 1.5605173087722384,
+        "accuracy_median_mm": 0.6605971258164882,
+        "completeness_median_mm": 0.8662522529828136,
+        "chamfer_median_mm": 0.7634246893996509,
+        "num_eval_points": 414113,
+        "precision_1mm": 0.62448071646636,
+        "recall_1mm": 0.5498545706765371,
+        "fscore_1mm": 0.5847964887162653,
+        "precision_2mm": 0.8044136685087143,
+        "recall_2mm": 0.7767178101929815,
+        "fscore_2mm": 0.7903231723732823,
+        "precision_5mm": 0.9249116010356687,
+        "recall_5mm": 0.9486683682886827,
+        "fscore_5mm": 0.9366393681954238,
+        "vertices": 319839,
+        "faces": 635592,
+        "components": 1,
+        "is_watertight": false,
+        "euler_number": -2
+      },
+      "Ours (Stage 1 Metric Mesh)": {
+        "accuracy_mean_mm": 1.7157743561312586,
+        "completeness_mean_mm": 1.7980062164536683,
+        "chamfer_mean_mm": 1.7568902862924634,
+        "accuracy_median_mm": 0.8370135164650216,
+        "completeness_median_mm": 1.1330606516077038,
+        "chamfer_median_mm": 0.9850370840363627,
+        "num_eval_points": 398403,
+        "precision_1mm": 0.5605259590619494,
+        "recall_1mm": 0.45441971429686584,
+        "fscore_1mm": 0.5019264633740811,
+        "precision_2mm": 0.7693356227313121,
+        "recall_2mm": 0.7010793554766273,
+        "fscore_2mm": 0.7336232703328779,
+        "precision_5mm": 0.9226876327323663,
+        "recall_5mm": 0.9404110235093608,
+        "fscore_5mm": 0.9314650280813617,
+        "vertices": 318139,
+        "faces": 632211,
+        "components": 1,
+        "is_watertight": false,
+        "euler_number": -2
+      },
+      "Ours (MVC Surface Cloud)": {
+        "accuracy_mean_mm": 0.6650019802025093,
+        "completeness_mean_mm": 0.9132320242831016,
+        "chamfer_mean_mm": 0.7891170022428055,
+        "accuracy_median_mm": 0.3944654297271746,
+        "completeness_median_mm": 0.5400181992351749,
+        "chamfer_median_mm": 0.46724181448117474,
+        "num_eval_points": 535420,
+        "precision_1mm": 0.8142224795487655,
+        "recall_1mm": 0.7690689123839772,
+        "fscore_1mm": 0.7910018332389879,
+        "precision_2mm": 0.9433155279967128,
+        "recall_2mm": 0.9225457070273358,
+        "fscore_2mm": 0.9328150179553686,
+        "precision_5mm": 0.9962365993052184,
+        "recall_5mm": 0.9828543195084211,
+        "fscore_5mm": 0.9895002150446589
+      },
+      "Original 3DGS Centers": {
+        "accuracy_mean_mm": 1.2628145581165524,
+        "completeness_mean_mm": 1.0930481637057163,
+        "chamfer_mean_mm": 1.1779313609111344,
+        "accuracy_median_mm": 0.7228682773382442,
+        "completeness_median_mm": 0.7487622884517386,
+        "chamfer_median_mm": 0.7358152828949914,
+        "num_eval_points": 252646,
+        "precision_1mm": 0.5991347577242466,
+        "recall_1mm": 0.718576900100757,
+        "fscore_1mm": 0.6534424953919353,
+        "precision_2mm": 0.7879958519034539,
+        "recall_2mm": 0.931151511600084,
+        "fscore_2mm": 0.8536133018162722,
+        "precision_5mm": 0.9756615976504674,
+        "recall_5mm": 0.9735004044932115,
+        "fscore_5mm": 0.9745798029272373
+      }
+    },
+    "historical_reference": {
+      "Thesis_Original_SDF_GS (Stage 2)": {
+        "chamfer_mean_mm": 3.07
+      },
+      "Thesis_Original_SDF_GS (Stage 1)": {
+        "chamfer_mean_mm": 2.34
+      },
+      "Thesis_Reported_PGSR": {
+        "chamfer_mean_mm": 0.56
+      },
+      "Thesis_Reported_2DGS": {
+        "chamfer_mean_mm": 0.65
+      },
+      "Thesis_Reported_GOF": {
+        "chamfer_mean_mm": 0.68
+      },
+      "Thesis_Reported_SuGaR": {
+        "chamfer_mean_mm": 1.14
+      }
+    },
+    "figures": {
+      "multiview_comparison": "/notebooks/SDF_GS_SDF-GS Refine/outputs/scan24/reconstructions/scan24_multiview_3d_comparison.png",
+      "closeup_comparison": "/notebooks/SDF_GS_SDF-GS Refine/outputs/scan24/reconstructions/scan24_closeup_detail_comparison.png"
+    }
+  },
+  "scan37": {
+    "elapsed_sec": 980.6657400131226,
+    "results": {
+      "SDF-GS Refine (Ours)": {
+        "accuracy_mean_mm": 3.585362038322232,
+        "completeness_mean_mm": 2.543710866304259,
+        "chamfer_mean_mm": 3.0645364523132455,
+        "accuracy_median_mm": 1.9607554100683364,
+        "completeness_median_mm": 1.428821270787341,
+        "chamfer_median_mm": 1.6947883404278388,
+        "num_eval_points": 489795,
+        "precision_1mm": 0.3383689943550929,
+        "recall_1mm": 0.3928320732981128,
+        "fscore_1mm": 0.36357220871934215,
+        "precision_2mm": 0.5052969614107765,
+        "recall_2mm": 0.5969062804723089,
+        "fscore_2mm": 0.5472945792726307,
+        "precision_5mm": 0.749642843985247,
+        "recall_5mm": 0.8504079021169263,
+        "fscore_5mm": 0.7968524746398907,
+        "vertices": 301329,
+        "faces": 597898,
+        "components": 1,
+        "is_watertight": false,
+        "euler_number": -18
+      },
+      "Ours (Post-Processed Viz Mesh)": {
+        "accuracy_mean_mm": 3.4021437589383847,
+        "completeness_mean_mm": 2.2810348500563435,
+        "chamfer_mean_mm": 2.841589304497364,
+        "accuracy_median_mm": 1.6124207398304258,
+        "completeness_median_mm": 1.1485560462283395,
+        "chamfer_median_mm": 1.3804883930293825,
+        "num_eval_points": 506486,
+        "precision_1mm": 0.385942172098463,
+        "recall_1mm": 0.4578253773147682,
+        "fscore_1mm": 0.41882179679826703,
+        "precision_2mm": 0.5557450917920476,
+        "recall_2mm": 0.6621194108046023,
+        "fscore_2mm": 0.6042866212954557,
+        "precision_5mm": 0.7571671412768366,
+        "recall_5mm": 0.8668601097520838,
+        "fscore_5mm": 0.8083090856659791,
+        "vertices": 301329,
+        "faces": 597898,
+        "components": 1,
+        "is_watertight": false,
+        "euler_number": -18
+      },
+      "Ours (Stage 1 Metric Mesh)": {
+        "accuracy_mean_mm": 3.322338942375148,
+        "completeness_mean_mm": 2.3236178509041885,
+        "chamfer_mean_mm": 2.822978396639668,
+        "accuracy_median_mm": 1.676785354588186,
+        "completeness_median_mm": 1.3288232272005218,
+        "chamfer_median_mm": 1.5028042908943537,
+        "num_eval_points": 479749,
+        "precision_1mm": 0.3724882466337649,
+        "recall_1mm": 0.4208811801607967,
+        "fscore_1mm": 0.3952088082664179,
+        "precision_2mm": 0.5515800993736412,
+        "recall_2mm": 0.6182937013462413,
+        "fscore_2mm": 0.5830346846314499,
+        "precision_5mm": 0.778656597027145,
+        "recall_5mm": 0.872557097151915,
+        "fscore_5mm": 0.8229369007480102,
+        "vertices": 300892,
+        "faces": 597320,
+        "components": 2,
+        "is_watertight": false,
+        "euler_number": -13
+      },
+      "Ours (MVC Surface Cloud)": {
+        "accuracy_mean_mm": 0.8399180643763484,
+        "completeness_mean_mm": 0.99859211805405,
+        "chamfer_mean_mm": 0.9192550912151992,
+        "accuracy_median_mm": 0.5338700867974199,
+        "completeness_median_mm": 0.5867251265633877,
+        "chamfer_median_mm": 0.5602976066804037,
+        "num_eval_points": 556476,
+        "precision_1mm": 0.7493045522178854,
+        "recall_1mm": 0.7409868097468721,
+        "fscore_1mm": 0.7451224691321394,
+        "precision_2mm": 0.9185804958345014,
+        "recall_2mm": 0.9137933545683001,
+        "fscore_2mm": 0.9161806719137603,
+        "precision_5mm": 0.9910705942394641,
+        "recall_5mm": 0.9756115323123669,
+        "fscore_5mm": 0.9832803054664965
+      },
+      "Original 3DGS Centers": {
+        "accuracy_mean_mm": 1.4145745268594887,
+        "completeness_mean_mm": 0.8975485184104203,
+        "chamfer_mean_mm": 1.1560615226349544,
+        "accuracy_median_mm": 0.8996083493246032,
+        "completeness_median_mm": 0.5876515817819785,
+        "chamfer_median_mm": 0.7436299655532909,
+        "num_eval_points": 458769,
+        "precision_1mm": 0.5283181731982762,
+        "recall_1mm": 0.7919217180650274,
+        "fscore_1mm": 0.6338039596785888,
+        "precision_2mm": 0.7408499702464639,
+        "recall_2mm": 0.9356576407950887,
+        "fscore_2mm": 0.8269356259149574,
+        "precision_5mm": 0.9722147747559229,
+        "recall_5mm": 0.9814907688932075,
+        "fscore_5mm": 0.9768307510887602
+      }
+    },
+    "historical_reference": {
+      "Thesis_Original_SDF_GS (Stage 2)": {
+        "chamfer_mean_mm": 5.97
+      },
+      "Thesis_Original_SDF_GS (Stage 1)": {
+        "chamfer_mean_mm": 3.55
+      },
+      "Thesis_Reported_PGSR": {
+        "chamfer_mean_mm": 0.72
+      },
+      "Thesis_Reported_2DGS": {
+        "chamfer_mean_mm": 0.89
+      },
+      "Thesis_Reported_GOF": {
+        "chamfer_mean_mm": 0.9
+      },
+      "Thesis_Reported_SuGaR": {
+        "chamfer_mean_mm": 1.26
+      }
+    },
+    "figures": {
+      "multiview_comparison": "/notebooks/SDF_GS_SDF-GS Refine/outputs/scan37/reconstructions/scan37_multiview_3d_comparison.png",
+      "closeup_comparison": "/notebooks/SDF_GS_SDF-GS Refine/outputs/scan37/reconstructions/scan37_closeup_detail_comparison.png"
+    }
+  }
+}

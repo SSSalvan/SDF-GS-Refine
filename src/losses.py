@@ -1,169 +1,173 @@
+"""Loss terms for Stage 1 and joint refinement.
+
+Stage-1 loss (thesis, recovered operational form):
+
+    L = 3.0 * mean |f(x_s)|
+      + 0.2 * weighted_mean [ w * (1 - cos(grad f, n)) ]
+      + 0.1 * mean (||grad f|| - 1)^2
+      + 0.1 * mean exp(-100 |f(x_near)|)
+      + 1.0 * mean relu(0.005 - f(x_free))
+
+The |f| vs f^2 choice is explicit (``surface_loss_norm``). No term silently
+detaches gradients. The near-surface term penalizes stray zero crossings; it
+is not a data term.
 """
-losses.py
+from __future__ import annotations
 
-Implements Persamaan 3.1:
-    L_total = L_photo + lambda_e * L_eikonal + lambda_n * L_normal
+import math
+from typing import Dict
 
-L_eikonal (Subbab 2.7 / Gropp et al. 2020):
-    E_{x~D} [ (||grad f(x)||_2 - 1)^2 ]
-
-L_normal (Subbab 2.8, "Normal Alignment Loss"):
-    Encourages grad f(x_s)/||grad f(x_s)|| to align with the Gaussian-derived
-    normal at each transmittance-crossing surface sample x_s, AND (per Subbab
-    3.6, "fθ(xs) ~ 0 untuk titik-titik permukaan xs") the zero-boundary
-    condition at those same points.
-    *** IMPLEMENTATION NOTE (reported in Technical Review) ***
-    The paper's Eq. 3.1 lists three terms (photo, eikonal, normal) but the
-    text of Subbab 3.6 separately states the zero-boundary condition without
-    giving it its own explicit weight in Table 3.3 (which is left blank for
-    this term). We fold the zero-boundary constraint into L_normal (same
-    lambda_n) since both are supervised at the identical surface-sample
-    locations and the paper does not specify a distinct weight for it -- this
-    is flagged explicitly rather than silently invented.
-
-L_photo (Subbab 2.4/2.5, alpha-compositing volume rendering, discretized
-exactly as Persamaan 2.7/3.2 but accumulating COLOR instead of transmittance):
-    C_hat(r) = sum_i T_i * alpha_i * G_i(x_i) * c_i
-    L_photo = mean |C_hat(r) - C_gt(r)|   (L1, standard choice, matches the
-    "photometric reconstruction loss" language in the paper, exact norm not
-    specified further than "meminimalkan photometric loss" in Bab III).
-
-*** KNOWN ISSUE / FIX (this revision) ***
-When no real DTU images are available, the pipeline falls back to a
-"frozen render of the pretrained Gaussian scene" as the L_photo target
-(see driving notebook, Section 11, DATASET REALITY). That frozen target is
-built by cloning the SAME pretrained state that gauss_f is reset to at the
-start of training. Under L1, d/d(rendered) |rendered - target| = sign(rendered
-- target). At iteration 0, rendered == target exactly (elementwise), so
-sign(0) == 0: L_photo genuinely evaluates to 0 AND its gradient into the
-Gaussian parameters is exactly zero, every iteration, forever -- Adam never
-receives a nonzero gradient for {positions, opacity, scales, rotations,
-colors}, so opt_gauss.step() is a permanent no-op even though it runs every
-iteration. This is a true fixed point, not noise: it does not "wear off"
-with more iterations or different camera batches, because render(gauss_f,
-cam) == render(gauss_frozen_target, cam) for any cam as long as the two
-parameter sets are identical, and nothing ever pushes them apart.
-
-Fix: build_frozen_photometric_target() below perturbs the cloned pretrained
-state by a small amount before it is frozen, so the target is numerically
-distinct from gauss_f at reset time. This does not change what L_photo is
-supposed to measure -- the target is still anchored to the real pretrained
-appearance (per the paper's justification that the 3DGS model is already
-fully trained), it is simply no longer bit-identical to the live parameters,
-which is what gives L1 a nonzero gradient direction to work with. Magnitude
-is small relative to parameter scale, so the term still primarily penalizes
-genuine drift-from-pretrained, rather than being dominated by injected noise.
-"""
 import torch
-from src.transmittance import _cull_candidates
+import torch.nn.functional as F
 
 
-# Default perturbation scale for the frozen photometric target, expressed as
-# a fraction of each tensor's own per-tensor std. Small enough that the
-# target still represents "the pretrained appearance," large enough that
-# rendered != target_rgb (in float32) at iteration 0.
-DEFAULT_PERTURB_FRACTION = 0.02
+def surface_loss(f: torch.Tensor, norm: str = "l1") -> torch.Tensor:
+    if f.numel() == 0:
+        raise ValueError("surface_loss received an empty batch")
+    if norm == "l1":
+        return f.abs().mean()
+    if norm == "l2":
+        return (f * f).mean()
+    raise ValueError(f"surface_loss_norm must be 'l1' or 'l2', got {norm!r}")
+
+
+def normal_loss(grad: torch.Tensor, normals: torch.Tensor,
+                weights: torch.Tensor, eps: float = 1e-8) -> torch.Tensor:
+    if grad.shape != normals.shape:
+        raise ValueError("grad and normals must have the same shape")
+    if weights.shape != grad.shape[:1]:
+        raise ValueError("weights must be (N,)")
+    g = grad / grad.norm(dim=-1, keepdim=True).clamp_min(eps)
+    n = normals / normals.norm(dim=-1, keepdim=True).clamp_min(eps)
+    cos = (g * n).sum(-1).clamp(-1.0, 1.0)
+    per = (1.0 - cos) * weights
+    denom = weights.sum().clamp_min(eps)
+    return per.sum() / denom
 
 
 def eikonal_loss(grad: torch.Tensor) -> torch.Tensor:
+    if grad.numel() == 0:
+        raise ValueError("eikonal_loss received an empty batch")
     return ((grad.norm(dim=-1) - 1.0) ** 2).mean()
 
 
-def normal_and_boundary_loss(f_at_surface: torch.Tensor, grad_at_surface: torch.Tensor,
-                              target_normals: torch.Tensor) -> torch.Tensor:
-    zero_term = (f_at_surface ** 2).mean()
-    grad_dir = torch.nn.functional.normalize(grad_at_surface, dim=-1)
-    cos = (grad_dir * target_normals).sum(-1)
-    align_term = (1.0 - cos.abs()).mean()   # abs() -> normal orientation sign is ambiguous from scale-axis proxy
-    return zero_term + align_term
+def stray_surface_loss(f: torch.Tensor, beta: float = 100.0) -> torch.Tensor:
+    if f.numel() == 0:
+        raise ValueError("stray_surface_loss received an empty batch")
+    if beta <= 0:
+        raise ValueError("beta must be positive")
+    return torch.exp(-beta * f.abs()).mean()
 
 
-@torch.no_grad()
-def _order_candidates_for_render(gauss, origins, dirs, cull_sigma=3.0, max_candidates=4096):
-    return _cull_candidates(gauss, origins, dirs, cull_sigma, max_candidates)
+def free_space_loss(f: torch.Tensor, margin: float = 0.005) -> torch.Tensor:
+    if f.numel() == 0:
+        raise ValueError("free_space_loss received an empty batch")
+    return F.relu(margin - f).mean()
 
 
-def render_rays(gauss, origins, dirs, cull_sigma=3.0, max_candidates=4096):
+def stage1_losses(
+    f_surface: torch.Tensor,
+    grad_surface: torch.Tensor,
+    normals: torch.Tensor,
+    normal_weights: torch.Tensor,
+    f_uniform: torch.Tensor,
+    grad_uniform: torch.Tensor,
+    f_near: torch.Tensor,
+    f_free: torch.Tensor,
+    cfg,
+) -> Dict[str, torch.Tensor | float]:
+    """Compute all Stage-1 terms and the weighted total."""
+    terms = {
+        "surface": surface_loss(f_surface, cfg.surface_loss_norm),
+        "normal": normal_loss(grad_surface, normals, normal_weights),
+        "eikonal": eikonal_loss(grad_uniform),
+        "stray": stray_surface_loss(f_near),
+        "free": free_space_loss(f_free, cfg.free_margin),
+    }
+    total = (cfg.surface_weight * terms["surface"]
+             + cfg.normal_weight * terms["normal"]
+             + cfg.eikonal_weight * terms["eikonal"]
+             + cfg.stray_weight * terms["stray"]
+             + cfg.free_weight * terms["free"])
+    terms["total"] = total
+    return terms
+
+
+def photometric_l1(rendered: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    """Mean absolute photometric error, both ``(H,W,3)`` or ``(N,3)``."""
+    if rendered.shape != target.shape:
+        raise ValueError(
+            f"rendered/target shape mismatch: {tuple(rendered.shape)} vs "
+            f"{tuple(target.shape)}"
+        )
+    if rendered.numel() == 0:
+        raise ValueError("photometric_l1 received empty tensors")
+    return (rendered - target).abs().mean()
+
+
+def coupling_loss(
+    f_mu: torch.Tensor,
+    grad_mu: torch.Tensor,
+    normals: torch.Tensor,
+    epsilon: float = 0.02,
+    zero_weight: float = 0.1,
+    normal_weight: float = 0.05,
+    eps: float = 1e-8,
+) -> tuple[torch.Tensor, dict]:
+    """Couple the SDF to nearby Gaussian centres.
+
+    Applies only to centres with ``|f(mu)| <= epsilon`` (the thesis's
+    ``sigma = 0.02`` surface band). Returns ``(loss, metrics)``. When no centre
+    is in the band, the loss is exactly zero but remains connected to the graph.
     """
-    Naive (non-tile-based) differentiable point renderer implementing the
-    SAME alpha-compositing math as the official 3DGS tile rasterizer
-    (Kerbl et al. 2023, Subbab 2.1) -- an "implementation detail" / engineering
-    substitution (different code path, identical math), used here because no
-    CUDA tile-rasterizer build is available in this CPU-only sandbox. This is
-    NOT a methodological change: it computes the exact same discretized
-    volume-rendering equation, just per-ray instead of per-tile, and is
-    therefore unsuitable for full-resolution real-time rendering but
-    perfectly valid for verifying pipeline correctness at small batch sizes.
-    """
-    device = origins.device
-    candidates = _order_candidates_for_render(gauss, origins, dirs, cull_sigma, max_candidates)
-    colors = []
-    for r in range(origins.shape[0]):
-        idx = candidates[r]
-        if idx.numel() == 0:
-            colors.append(torch.zeros(3, device=device))
-            continue
-        o, d = origins[r], dirs[r]
-        v = gauss.positions[idx] - o
-        t = (v * d).sum(-1)
-        order = torch.argsort(t)
-        idx_sorted = idx[order]
-        t_sorted = t[order]
-        x_i = o.unsqueeze(0) + t_sorted.unsqueeze(-1) * d.unsqueeze(0)
-        Gi = gauss.density_at(x_i, idx_sorted)
-        alpha_i = gauss.opacity[idx_sorted]
-        a = torch.clamp(alpha_i * Gi, 0.0, 1.0 - 1e-6)
-        term = 1.0 - a
-        cum = torch.cumprod(term, dim=0)
-        T = torch.cat([torch.ones(1, device=device), cum[:-1]])
-        w = (T * a).unsqueeze(-1)                     # (M,1)
-        c = gauss.colors[idx_sorted]                   # (M,3)
-        colors.append((w * c).sum(0))
-    return torch.stack(colors)
+    if f_mu.shape != grad_mu.shape[:1]:
+        raise ValueError("f_mu must be (N,) and grad_mu (N,3)")
+    if normals.shape != grad_mu.shape:
+        raise ValueError("normals must be (N,3)")
+    if epsilon <= 0:
+        raise ValueError("epsilon must be positive")
+    mask = f_mu.abs() <= epsilon
+    n = int(mask.sum().item())
+    zero = f_mu.sum() * 0.0
+    if n == 0:
+        return zero, {"n_coupled": 0, "zero": 0.0, "normal": 0.0}
+    f_sel = f_mu[mask]
+    g = grad_mu[mask]
+    nrm = normals[mask]
+    zero_term = f_sel.abs().mean()
+    g_unit = g / g.norm(dim=-1, keepdim=True).clamp_min(eps)
+    n_unit = nrm / nrm.norm(dim=-1, keepdim=True).clamp_min(eps)
+    cos = (g_unit * n_unit).sum(-1).abs().clamp(0.0, 1.0)
+    normal_term = (1.0 - cos).mean()
+    loss = zero_weight * zero_term + normal_weight * normal_term
+    return loss, {
+        "n_coupled": n,
+        "zero": float(zero_term.detach()),
+        "normal": float(normal_term.detach()),
+    }
 
 
-def photometric_loss(gauss, origins, dirs, target_rgb, cull_sigma=3.0, max_candidates=4096):
-    rendered = render_rays(gauss, origins, dirs, cull_sigma, max_candidates)
-    return torch.nn.functional.l1_loss(rendered, target_rgb), rendered
+def lr_scale(step: int, total_steps: int, warmup_fraction: float = 0.05,
+             min_ratio: float = 0.02) -> float:
+    """Linear warm-up then cosine decay, as ``base_lr * scale``."""
+    if total_steps <= 0:
+        raise ValueError("total_steps must be positive")
+    if not (0.0 <= warmup_fraction < 1.0):
+        raise ValueError("warmup_fraction must be in [0,1)")
+    if not (0.0 <= min_ratio <= 1.0):
+        raise ValueError("min_ratio must be in [0,1]")
+    step = max(0, int(step))
+    warmup = max(1, int(round(warmup_fraction * total_steps)))
+    if step < warmup:
+        return float(step + 1) / float(warmup)
+    t = (step - warmup) / max(1, total_steps - warmup)
+    t = min(max(t, 0.0), 1.0)
+    return float(min_ratio + (1.0 - min_ratio) * 0.5 * (1.0 + math.cos(math.pi * t)))
 
 
-def build_frozen_photometric_target(gauss_initial_state, perturb_fraction=DEFAULT_PERTURB_FRACTION,
-                                     generator=None):
-    """
-    Build the "frozen render of the pretrained Gaussian scene" target used as
-    a synthetic L_photo target when no real DTU images are available (see
-    module docstring, KNOWN ISSUE / FIX).
-
-    gauss_initial_state must already be an independent clone of the
-    pretrained state (e.g. gauss_pretrained_state.clone_detached()) -- this
-    function perturbs that clone in place and returns it; it does not clone
-    again, so callers must pass a clone they are willing to have mutated,
-    never the live gauss_f or the shared immutable pretrained baseline.
-
-    Only `positions` and `colors` are perturbed. These are the two tensors
-    that most directly determine rendered RGB via `render_rays` (positions
-    move where along each ray G_i(x_i) is evaluated; colors are compositied
-    directly), so perturbing them is sufficient to break the rendered ==
-    target identity and is more conservative than also perturbing
-    opacity/scales/rotations, which shape the compositing weights themselves
-    and would change what "drift from pretrained" means for those params.
-
-    perturb_fraction is relative to each tensor's own per-tensor std, so the
-    perturbation scales sensibly regardless of the underlying scene's units.
-    """
-    if not (0.0 < perturb_fraction < 1.0):
-        raise ValueError(f"perturb_fraction should be a small positive fraction, got {perturb_fraction}")
-
-    with torch.no_grad():
-        pos_std = gauss_initial_state.positions.std()
-        color_std = gauss_initial_state.colors.std()
-        pos_noise = torch.randn(gauss_initial_state.positions.shape,
-                                 device=gauss_initial_state.positions.device,
-                                 generator=generator) * (pos_std * perturb_fraction)
-        color_noise = torch.randn(gauss_initial_state.colors.shape,
-                                   device=gauss_initial_state.colors.device,
-                                   generator=generator) * (color_std * perturb_fraction)
-        gauss_initial_state.positions += pos_noise
-        gauss_initial_state.colors += color_noise
-
-    return gauss_initial_state
+def psnr(rendered: torch.Tensor, target: torch.Tensor,
+         max_value: float = 1.0) -> float:
+    mse = float(((rendered - target) ** 2).mean())
+    if mse <= 0:
+        return float("inf")
+    return 20.0 * math.log10(max_value) - 10.0 * math.log10(mse)
